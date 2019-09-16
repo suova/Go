@@ -86,7 +86,7 @@ func Test_sortCaseUniqueByColumn(t *testing.T){
 }
 func Test_writeFile(t *testing.T)  {
 	arr :=[]string{"Apple", "BOOK", "Book", "Go","January","January","Napkin"}
-	file :="data.txt"
+	file :="file.txt"
 	writeFile(arr,file)
 	content, err := ioutil.ReadFile(file)
 	res := strings.Split(string(content), "\n")
