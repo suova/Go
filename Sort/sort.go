@@ -119,9 +119,6 @@ func writeFile(elements[]string, file string){
 			log.Println(err)
 		}
 	}
-
-
-
 }
 
 func sortByKey(elements []string, keys Keys) []string {
