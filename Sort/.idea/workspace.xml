@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c1fcecb1-97ec-4ac4-ad4f-403fba8d77a7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../Calc/calc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Calc/calc.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Calc/calc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Calc/calc_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Calc/calc_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sort.go" beforeDir="false" afterPath="$PROJECT_DIR$/sort.go" afterDir="false" />
@@ -43,7 +43,7 @@
     <property name="configurable.Module.GOPATH.is.expanded" value="false" />
     <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Calc" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RunDashboard">
@@ -58,7 +58,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.Test_sortReverse in sort_test.go">
+  <component name="RunManager" selected="Go Build.go build sort.go">
     <configuration name="go build sort.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="Sort" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -88,9 +88,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build sort.go" />
         <item itemvalue="Go Test.Test_sortReverse in sort_test.go" />
         <item itemvalue="Go Test.sort_test.go" />
-        <item itemvalue="Go Build.go build sort.go" />
       </list>
     </recent_temporary>
   </component>

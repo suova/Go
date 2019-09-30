@@ -17,40 +17,38 @@ var operations = map[string]struct {
 	"-": {2},
 }
 
-func pushString(stack []string, elem string) []string {
-	return append(stack, elem)
-}
-func popString(stack []string) (string, []string) {
-	return stack[len(stack)-1], stack[:len(stack)-1]
-}
-
 func parseInfix(equation []string) (rpnString string) {
-	var stack []string
+	stack := make(Stack, 0)
 	for _, elem := range equation {
 		switch elem {
 		case "(":
-			stack = pushString(stack, elem)
+			stack.push(elem)
 		case ")":
-			var op string
+
 			for {
-				op, stack = popString(stack)
-				if op == "(" {
+				operand, err := stack.pop()
+				if err != nil {
+					return ""
+				}
+				if operand == "(" {
 					break // отрасываем "("
 				}
-				rpnString += " " + op
+				rpnString += " " + operand
 			}
 		default:
-			if o1, isOp := operations[elem]; isOp {
+			if elem1, isOperator := operations[elem]; isOperator {
+				//если elem1 оператор, заходим сюда
 				for len(stack) > 0 {
-					op, _ := popString(stack)
-					if o2, isOp := operations[op]; !isOp || o1.precedence > o2.precedence ||
-						o1.precedence == o2.precedence {
+					topElem := stack[len(stack)-1]
+					if elem2, isOperator := operations[topElem]; !isOperator || elem1.precedence > elem2.precedence ||
+						elem1.precedence == elem2.precedence {
 						break
 					}
-					_, stack = popString(stack)
-					rpnString += " " + op
+
+					stack = stack[:len(stack)-1]
+					rpnString += " " + topElem
 				}
-				stack = pushString(stack, elem)
+				stack = append(stack, elem)
 			} else {
 				if rpnString > "" {
 					rpnString += " "
@@ -61,88 +59,91 @@ func parseInfix(equation []string) (rpnString string) {
 	}
 
 	for len(stack) > 0 {
-		elem, restStack := popString(stack)
+		elem, restStack := stack[len(stack)-1], stack[:len(stack)-1]
 		rpnString += " " + elem
 		stack = restStack
 	}
 	return
 }
-func calc(equation []string) (float64, error) {
-	stack := make([]int, 0)
+func calc(equation []string) (string, error) {
+	stack := make(Stack, 0)
 
 	for _, elem := range equation {
 		i, err := strconv.Atoi(elem)
-
 		if err == nil {
-			stack = push(stack, i)
+			stack.push(strconv.Itoa(i))
 		} else {
 			switch elem {
 			case "+", "-", "*", "/":
-				stack, err = action(stack, elem)
+
+				a, err := stack.pop()
 				if err != nil {
-					return 0, err
+					return "", err
 				}
-				break
-			case " ":
-				break
+				b, err := stack.pop()
+				if err != nil {
+					return "", err
+				}
+
+				elem1, _ := strconv.Atoi(b)
+				elem2, _ := strconv.Atoi(a)
+
+				switch elem {
+				case "+":
+					fmt.Println(elem1 + elem2)
+					stack.push(strconv.Itoa(elem1 + elem2))
+
+				case "-":
+					stack.push(strconv.Itoa(elem1 - elem2))
+
+				case "*":
+					stack.push(strconv.Itoa(elem1 * elem2))
+
+				case "/":
+					if elem2 != 0 {
+						stack.push(strconv.Itoa(elem1 / elem2))
+
+					} else {
+						return "", errors.New(fmt.Sprintf("division by zero"))
+					}
+				default:
+					return "", errors.New(fmt.Sprintf("This symbol is not used in calc '%s'", elem))
+				}
 			default:
-				return 0, errors.New(fmt.Sprintf("This symbol is not used in calc '%s'", elem))
+				return "", errors.New(fmt.Sprintf("This symbol is not used in calc '%s'", elem))
 			}
 		}
 	}
 
-	result, _ := pop(stack)
-	return float64(result), nil
-}
-
-func action(stack []int, operator string) ([]int, error) {
-	elem1, stack := pop(stack)
-	elem2, stack := pop(stack)
-	switch operator {
-	case "+":
-		return append(stack, elem1+elem2), nil
-	case "-":
-		return append(stack, elem2-elem1), nil
-	case "*":
-		return append(stack, elem1*elem2), nil
-	case "/":
-		if elem1 != 0 {
-			return append(stack, elem2/elem1), nil
-
-		} else {
-			return nil, errors.New(fmt.Sprintf("division by zero"))
-		}
-	default:
-		return nil, errors.New(fmt.Sprintf("This symbol is not used in calc '%s'", operator))
+	result, err := stack.pop()
+	if err != nil {
+		return "", err
 	}
+	return result, nil
 }
 
-func pop(stack []int) (int, []int) {
-	return stack[len(stack)-1], stack[:len(stack)-1]
+type Stack []string
+
+func (stack *Stack) pop() (string, error) {
+	l := len(*stack)
+	if l == 0 {
+		return "", errors.New("len of stack is null")
+	}
+	elem := (*stack)[l-1]
+	*stack = (*stack)[:l-1]
+	return elem, nil
 }
-func push(stack []int, elem int) []int {
-	return append(stack, elem)
+func (stack *Stack) push(elem string) {
+	*stack = append(*stack, elem)
 }
 
 func main() {
-	s := strings.Split((os.Args[1:])[0], "")
-
-	expression := ""
-	for i, c := range s {
-		if c == "(" && i == 0 {
-			expression += c
-			expression += " "
-			continue
-		} else if c == "*" || c == "/" || c == "+" || c == "-" || c == ")" || c == "(" {
-			expression += " "
-			expression += c
-			expression += " "
-		} else {
-			expression += c
-		}
+	expression := strings.Split((os.Args[1:])[0], "")
+	if len(expression) == 0 {
+		fmt.Println("length is null")
 	}
 
-	equation := parseInfix(strings.Fields(expression))
+	equation := parseInfix(expression)
 	result, err := calc(strings.Split(equation, " "))
 
 	if err != nil {
