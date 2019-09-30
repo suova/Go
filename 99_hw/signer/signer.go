@@ -16,17 +16,16 @@ func SingleHash(in, out chan interface{}) {
 	}
 	wg.Wait()
 }
+
 func WorkerSingleHash(md5 string, i int, out chan interface{}, wg *sync.WaitGroup) {
 	defer wg.Done()
-
 	crc32 := make(chan string)
 	go Calculate(crc32, strconv.Itoa(i))
-
 	md5Chan := make(chan string)
 	go Calculate(md5Chan, md5)
-
 	out <- <-crc32 + "~" + <-md5Chan
 }
+
 func Calculate(ch chan string, s string) {
 	ch <- DataSignerCrc32(s)
 }
