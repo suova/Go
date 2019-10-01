@@ -15,18 +15,22 @@ func SingleHash(in, out chan interface{}) {
 		go WorkerSingleHash(i.(int), out, mutex, wg)
 	}
 	wg.Wait()
+	defer wg.Wait()
 }
-
-func WorkerSingleHash(i int, out chan interface{}, mutex *sync.Mutex, wg *sync.WaitGroup) {
+func WorkerSingleHash( i int, out chan interface{}, mutex *sync.Mutex, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	waitGroup := &sync.WaitGroup{}
 
 	mutex.Lock()
 	md5 := DataSignerMd5(strconv.Itoa(i))
 	mutex.Unlock()
 
+	waitGroup.Add(1)
 	crc32 := make(chan string)
 	go Calculate(crc32, strconv.Itoa(i))
 
+	waitGroup.Add(1)
 	md5Chan := make(chan string)
 	go Calculate(md5Chan, md5)
 
@@ -36,6 +40,7 @@ func WorkerSingleHash(i int, out chan interface{}, mutex *sync.Mutex, wg *sync.W
 func Calculate(ch chan string, s string) {
 	ch <- DataSignerCrc32(s)
 }
+
 
 func MultiHash(in, out chan interface{}) {
 	wg := &sync.WaitGroup{}
