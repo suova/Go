@@ -9,20 +9,27 @@ import (
 
 func SingleHash(in, out chan interface{}) {
 	wg := &sync.WaitGroup{}
+	mutex := &sync.Mutex{}
 	for i := range in {
 		wg.Add(1)
-		md5 := DataSignerMd5(strconv.Itoa(i.(int)))
-		go WorkerSingleHash(md5, i.(int), out, wg)
+		go WorkerSingleHash(i.(int), out, mutex, wg)
 	}
 	wg.Wait()
 }
 
-func WorkerSingleHash(md5 string, i int, out chan interface{}, wg *sync.WaitGroup) {
+func WorkerSingleHash(i int, out chan interface{}, mutex *sync.Mutex, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	mutex.Lock()
+	md5 := DataSignerMd5(strconv.Itoa(i))
+	mutex.Unlock()
+
 	crc32 := make(chan string)
 	go Calculate(crc32, strconv.Itoa(i))
+
 	md5Chan := make(chan string)
 	go Calculate(md5Chan, md5)
+
 	out <- <-crc32 + "~" + <-md5Chan
 }
 
