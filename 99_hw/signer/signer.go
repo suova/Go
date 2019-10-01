@@ -7,32 +7,37 @@ import (
 	"sync"
 )
 
+type MD5Hasher struct {
+	mu sync.Mutex
+}
+
 func SingleHash(in, out chan interface{}) {
 	wg := &sync.WaitGroup{}
-	mutex := &sync.Mutex{}
 	for i := range in {
 		wg.Add(1)
-		go WorkerSingleHash(i.(int), out, mutex, wg)
+		go WorkerSingleHash(i.(int), out, wg)
 	}
 	wg.Wait()
-	defer wg.Wait()
 }
-func WorkerSingleHash( i int, out chan interface{}, mutex *sync.Mutex, wg *sync.WaitGroup) {
+
+func (m *MD5Hasher) Hash(i int) string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	md5 := DataSignerMd5(strconv.Itoa(i))
+	return md5
+}
+
+var md5Hasher = MD5Hasher{}
+
+func WorkerSingleHash( i int, out chan interface{},  wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	waitGroup := &sync.WaitGroup{}
-
-	mutex.Lock()
-	md5 := DataSignerMd5(strconv.Itoa(i))
-	mutex.Unlock()
-
-	waitGroup.Add(1)
 	crc32 := make(chan string)
 	go Calculate(crc32, strconv.Itoa(i))
-
-	waitGroup.Add(1)
+	
+	hash := md5Hasher.Hash(i)
 	md5Chan := make(chan string)
-	go Calculate(md5Chan, md5)
+	go Calculate(md5Chan, hash)
 
 	out <- <-crc32 + "~" + <-md5Chan
 }
